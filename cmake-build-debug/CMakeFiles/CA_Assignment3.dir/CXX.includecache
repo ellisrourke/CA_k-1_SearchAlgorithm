@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/Ellis/Documents/GitHub/CA_Assignment3/main.cpp
+iostream
+-
+unordered_map
+-
+fstream
+-
+vector
+-
+
