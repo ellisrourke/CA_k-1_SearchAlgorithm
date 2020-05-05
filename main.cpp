@@ -25,7 +25,7 @@ public:
             agencyMatrix[a][b] = w;
         }
 
-        //outputMatrix();
+        outputMatrix();
     }
     void outputMatrix(){
         std::cout << "  ";
@@ -40,13 +40,12 @@ public:
         }
     }
 
-
-    int minDist(std::vector<int> dist, std::vector<bool> visited){
+    int minDist(std::vector<int>dist, std::vector<bool> visitedList){
         int min = INT_MAX;
         int index;
 
         for(int i=0;i<n;i++){
-            if(visited[i] == false && dist[i]<=min){
+            if(visitedList[i] == false && dist[i]<=min){
                 min = dist[i];
                 index=i;
             }
@@ -54,33 +53,54 @@ public:
         return index;
     }
 
+
+    void printPath(std::vector<int>parent, int j)
+    {
+
+        // Base Case : If j is source
+        if (parent[j] == - 1)
+            return;
+
+        printPath(parent, parent[j]);
+
+        printf("%d ", j);
+    }
+
+    int printSolution(std::vector<int>dist, std::vector<int>parent)
+    {
+        int src = 0;
+        printf("Vertex\t Distance\tPath");
+        for (int i = 1; i < n; i++)
+        {
+            printf("\n%d -> %d \t\t %d\t\t%d ",
+                   src, i, dist[i], src);
+            printPath(parent, i);
+        }
+    }
+
+
     void dijkstra(int src){
         std::vector<int>dist(n);
-        std::vector<bool>visited(5,false);
+        std::vector<int> parent(n);
+        std::vector<bool>visited(n,false);
+        parent[0] = -1;
         for(int i=0;i<n;i++){
-
             dist[i] = INT_MAX;
-            //visited[i] = false; //done above
         }
         dist[src] = 0; //set distance of start node to 0
-
-        for(int i =0; i<n;i++){ //find next closest node
+        for(int i =0; i<n-1;i++){ //find next closest node
             int nextNode = minDist(dist,visited);
             visited[nextNode] = true;
-            std::cout << nextNode <<std::endl;
+            //std::cout << nextNode <<std::endl;
             for(int j=0;j<n;j++){ //update distances for next nodes
-                if(!visited[i] && agencyMatrix[nextNode][i] && dist[nextNode]!=INT_MAX && dist[nextNode]+agencyMatrix[nextNode][i]<dist[i]) {
-                    dist[i] = dist[nextNode] + agencyMatrix[nextNode][i];
+
+                if (!visited[j] && agencyMatrix[nextNode][j] && dist[nextNode] + agencyMatrix[nextNode][j] < dist[j]){
+                    parent[j] = nextNode;
+                    dist[j] = dist[nextNode] + agencyMatrix[nextNode][j];
                 }
             }
         }
-
-        for(int i =0;i<dist.size();i++){
-            std::cout << dist[i] << std::endl;
-        }
-
-
-
+        printSolution(dist,parent);
     }
 protected:
     std::vector<std::vector<int>> agencyMatrix;
