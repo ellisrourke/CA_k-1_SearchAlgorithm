@@ -2,7 +2,6 @@
 #include <unordered_map>
 #include <fstream>
 #include <vector>
-
 class ksp{
 public:
     void readData(const std::string &fileName){
@@ -18,14 +17,19 @@ public:
 
 
 
-        int a,b;
-        double w;
-        while(std::getline(inFile,inLine)) {
+        int a=0,b=0;
+        double w=0.0;
+        int count =0;
+        while(count<m){
+            std::getline(inFile,inLine);
             inFile >> a >> b >> w;
             agencyMatrix[a][b] = w;
+            count++;
         }
-
-        outputMatrix();
+        std::getline(inFile,inLine);
+        inFile >> source >> dest;
+        //outputMatrix();
+        dijkstra(source);
     }
     void outputMatrix(){
         std::cout << "  ";
@@ -40,7 +44,7 @@ public:
         }
     }
 
-    int minDist(std::vector<int>dist, std::vector<bool> visitedList){
+    int minDist(std::vector<double> &dist, std::vector<bool> &visitedList){
         int min = INT_MAX;
         int index;
 
@@ -53,34 +57,38 @@ public:
         return index;
     }
 
-
-    void printPath(std::vector<int>parent, int j)
+    static void printPath(std::vector<int> &parent, int &j)
     {
 
         // Base Case : If j is source
         if (parent[j] == - 1)
             return;
-
         printPath(parent, parent[j]);
 
-        printf("%d ", j);
+        std::cout << j;
     }
 
-    int printSolution(std::vector<int>dist, std::vector<int>parent)
+    int printSolution(std::vector<double> &dist, std::vector<int> &parent)
     {
-        int src = 0;
-        printf("Vertex\t Distance\tPath");
-        for (int i = 1; i < n; i++)
+        int src = source;
+        printf("Vertex\t Distance\tPath\n");
+        for (int i = dest; i <= dest; i++)
         {
-            printf("\n%d -> %d \t\t %d\t\t%d ",
-                   src, i, dist[i], src);
-            printPath(parent, i);
+            if(dist[i] == INT_MAX or dist[i] <0){
+                std::cout << src << " -> "  << i << "\t " << "null\t\t";
+
+            } else {
+                std::cout << src << " -> "  << i <<  "\t " << dist[i] << "\t\t";
+            }
+            //printf("\n%d -> %d \t\t %d\t\t%d ",src, i, dist[i], src);
+            //printPath(parent, i);
+            std::cout << std::endl;
+
         }
     }
 
-
     void dijkstra(int src){
-        std::vector<int>dist(n);
+        std::vector<double>dist(n);
         std::vector<int> parent(n);
         std::vector<bool>visited(n,false);
         parent[0] = -1;
@@ -94,25 +102,28 @@ public:
             //std::cout << nextNode <<std::endl;
             for(int j=0;j<n;j++){ //update distances for next nodes
 
-                if (!visited[j] && agencyMatrix[nextNode][j] && dist[nextNode] + agencyMatrix[nextNode][j] < dist[j]){
+                if (!visited[j] && agencyMatrix[nextNode][j]!=0 && dist[nextNode] + agencyMatrix[nextNode][j] < dist[j]){
                     parent[j] = nextNode;
                     dist[j] = dist[nextNode] + agencyMatrix[nextNode][j];
                 }
             }
         }
         printSolution(dist,parent);
+
+
     }
 protected:
-    std::vector<std::vector<int>> agencyMatrix;
+    std::vector<std::vector<double>> agencyMatrix;
     std::vector<int> visited;
-    int n,m;
+    int n,m; //num nodes, num edges
+    int source,dest; //source dest
 };
 
 
 int main(int argc, char *argv[]) {
     ksp main;
     main.readData(argv[1]);
-    main.dijkstra(0);
+
 
  //N = number of veriticies
  //M = number of edges
