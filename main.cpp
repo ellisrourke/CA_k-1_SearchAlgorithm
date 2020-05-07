@@ -3,6 +3,8 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <float.h>
+#include <ctime>
 
 class ksp{
 public:
@@ -65,25 +67,47 @@ public:
     }*/
 
     void kSolution(std::vector<int> &parent, int j){
+        firstCall = false;
         while(j!=-1){
-            path.emplace_back(parent[j]);
-            //std::cout << j;
+            //path.emplace_back(parent[j]);
+            //std::cout << j << std::endl;
             j = parent[j];
         }
-        std::cout << dest << std::endl;
-        for(int i=0;i<path.size()-1;i++){
-            std::cout << path[i] << std::endl;
+        int localDest = 0;
+        for(int i=0;i<k;i++) {
+            localDest = parent[localDest];
+            if(i==0)
+                localDest = dest;
+            else
+                localDest = parent[localDest];
+            int y = parent[localDest];
+            localDest = parent[localDest];
+            int x = parent[localDest];
+
+            //for(int i)
+            //std::cout << x << " " << y << std::endl;
+            double temp = agencyMatrix[x][y];
+            agencyMatrix[x][y] = DBL_MAX;
+            double ans = dijkstra(source);
+            std::cout << "distance = " << ans << std::endl;
+
+            agencyMatrix[x][y] = temp;
+
+        }
+        //std::cout << dest << std::endl;
+        //for(int i=0;i<path.size()-1;i++){
+        //    std::cout << path[i] << std::endl;
         }
         //dijkstra(source,1);
-        }
+        //}
 
 
 
-    double dijkstra(int src,int count=0){
+    double dijkstra(int src){
         std::vector<double> dist(n);
         std::vector<int> parent(n);
         std::vector<bool>visited(n,false);
-        parent[0] = -1;
+        parent[src] = -1;
         for(int i=0;i<n;i++){
             dist[i] = INT_MAX;
         }
@@ -98,30 +122,36 @@ public:
                 }
             }
         }
-        //if(called==0)
-            //getPath(parent,dist[dest]
-            std::cout << "distance = " << dist[dest] << std::endl;
-            kSolution(parent,dest);
-        //..if(k>1 && called==0) {
-         //   ..kSoultion(dist,parent);
-        //}
-        //k -= 1;
+
+        if(firstCall) {
+            kSolution(parent, dest);
+            std::cout << "distance = " << std::fixed << dist[dest] << std::endl;
+
+
+        }
+        return dist[dest];
+
+
 
     }
 
 public:
     int n,m; //num nodes, num edges
     int source,dest;
-    int k = 1; //source dest kTimes
+    int k = 3; //source dest kTimes
 protected:
     std::vector<std::vector<double>> agencyMatrix;
+    std::vector<double> solutions;
     std::vector<int> visited;
     std::vector<int> path;
+    bool firstCall = true;
 
 };
 
 
 int main(int argc, char *argv[]) {
+    srand(time(0));
+
     ksp main;
     main.readData(argv[1]);
     main.dijkstra(main.source);
