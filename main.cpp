@@ -8,6 +8,7 @@
 
 class ksp{
 public:
+    ksp(){}
     void readData(const std::string &fileName){
         std::ifstream inFile;
         inFile.open(fileName);
@@ -17,8 +18,9 @@ public:
         std::string inLine;
         inFile >> n  >> m;
         agencyMatrix.resize(n);
+        parent.resize(n);
         for (int i = 0; i < n; ++i){agencyMatrix[i].resize(n);}
-
+        //std::cout << agencyMatrix[0][1];
         int a=0,b=0;
         double w=0.0;
         int count =0;
@@ -30,6 +32,7 @@ public:
         }
         std::getline(inFile,inLine);
         inFile >> source >> dest;
+        x = dest;
     }
     void outputMatrix(){
         std::cout << "  ";
@@ -45,7 +48,7 @@ public:
     }
     int minDist(std::vector<double> &dist, std::vector<bool> &visitedList){
         int min = INT_MAX;
-        int index;
+        int index=0;
 
         for(int i=0;i<n;i++){
             if(visitedList[i] == false && dist[i]<=min){
@@ -66,46 +69,43 @@ public:
         //std::cout << j << " ";
     }*/
 
-    void kSolution(std::vector<int> &parent, int j){
-        firstCall = false;
-        while(j!=-1){
-            //path.emplace_back(parent[j]);
-            //std::cout << j << std::endl;
-            j = parent[j];
-        }
-        int localDest = 0;
-        for(int i=0;i<k;i++) {
-            localDest = parent[localDest];
-            if(i==0)
-                localDest = dest;
-            else
-                localDest = parent[localDest];
-            int y = parent[localDest];
-            localDest = parent[localDest];
-            int x = parent[localDest];
-
-            //for(int i)
-            //std::cout << x << " " << y << std::endl;
-            double temp = agencyMatrix[x][y];
-            agencyMatrix[x][y] = DBL_MAX;
-            double ans = dijkstra(source);
-            std::cout << "distance = " << ans << std::endl;
-
-            agencyMatrix[x][y] = temp;
-
-        }
-        //std::cout << dest << std::endl;
-        //for(int i=0;i<path.size()-1;i++){
-        //    std::cout << path[i] << std::endl;
-        }
-        //dijkstra(source,1);
+    void kSolution() {
+        //while(j!=-1){
+        //path.emplace_back(parent[j]);
+        //std::cout << j << std::endl;
+        //    j = parent[j];
         //}
+        double sol = INT_MAX;
+        int a=0;
+        int b=0;
+        int temp=0;
+        int minIndex = 0;
+        double minValue = INT_MAX; 
+        /*while(sol == INT_MAX){
+            a = parent[x];
+            b = parent[a];
+            x = a;
+            temp = agencyMatrix[b][a];
+            agencyMatrix[b][a]  = 0;
+            sol = dijkstra(source);
+            agencyMatrix[b][a] = temp;
+        }
+*/
+        std::cout << "---" << std::endl;
+        std::cout << b << " " << a << " ";
+        std::cout << agencyMatrix[b][a] << std::endl;
+        std::cout << b << " " << a << " ";
+        std::cout << agencyMatrix[b][a] << std::endl;
+        std::cout << "---" << std::endl;
 
 
+        parent.clear();
+        }
 
     double dijkstra(int src){
         std::vector<double> dist(n);
-        std::vector<int> parent(n);
+        //std::cout << dist[dest] << "dM " << std::endl;
+        //parent.clear();
         std::vector<bool>visited(n,false);
         parent[src] = -1;
         for(int i=0;i<n;i++){
@@ -123,12 +123,8 @@ public:
             }
         }
 
-        if(firstCall) {
-            kSolution(parent, dest);
-            std::cout << "distance = " << std::fixed << dist[dest] << std::endl;
+        std::cout << "distance = " << std::fixed << dist[dest] << std::endl;
 
-
-        }
         return dist[dest];
 
 
@@ -137,14 +133,13 @@ public:
 
 public:
     int n,m; //num nodes, num edges
-    int source,dest;
-    int k = 3; //source dest kTimes
+    int source,dest;//source dest
+    int x;
+    int k = 5; // kTimes
+    int current = 0; //current k value
 protected:
     std::vector<std::vector<double>> agencyMatrix;
-    std::vector<double> solutions;
-    std::vector<int> visited;
-    std::vector<int> path;
-    bool firstCall = true;
+    std::vector<int> parent;
 
 };
 
@@ -155,9 +150,16 @@ int main(int argc, char *argv[]) {
     ksp main;
     main.readData(argv[1]);
     main.dijkstra(main.source);
+    main.kSolution();
+    main.dijkstra(main.source);
 
 
- //N = number of veriticies
+
+
+
+
+
+    //N = number of veriticies
  //M = number of edges
 
  //s = start node
