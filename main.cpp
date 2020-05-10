@@ -69,19 +69,10 @@ public:
         //std::cout << j << " ";
     }*/
 
-    void kSolution() {
-        //while(j!=-1){
-        //path.emplace_back(parent[j]);
-        //std::cout << j << std::endl;
-        //    j = parent[j];
-        //}
-        double sol = INT_MAX;
-        int a=0;
-        int b=0;
-        int temp=0;
-        int minIndex = 0;
-        double minValue = INT_MAX; 
-        /*while(sol == INT_MAX){
+    /*void kSolution() {
+
+
+        while(sol == INT_MAX){
             a = parent[x];
             b = parent[a];
             x = a;
@@ -90,7 +81,7 @@ public:
             sol = dijkstra(source);
             agencyMatrix[b][a] = temp;
         }
-*/
+
         std::cout << "---" << std::endl;
         std::cout << b << " " << a << " ";
         std::cout << agencyMatrix[b][a] << std::endl;
@@ -101,11 +92,59 @@ public:
 
         parent.clear();
         }
+*/
 
-    double dijkstra(int src){
+    static void swap(double* x, double* y)
+    {
+        double temp = *x;
+        *x = *y;
+        *y = temp;
+    }
+    static int partition(std::vector<double> scores, int low, int high){
+        int pivot = scores[high];
+        int index = (low - 1);
+
+        for(int i=low;i<=high;i++){
+            if(scores[i] <= pivot){
+                i++;
+                swap(&scores[index],&scores[i]);
+            }
+        }
+        swap(&scores[index+1],&scores[high]);
+        return(index+1);
+    }
+    static void quickSort(std::vector<double> &scores, int low, int high){
+        if(low<high){
+            int pIndex = partition(scores,low,high);
+            quickSort(scores,low,pIndex-1);
+            quickSort(scores,pIndex+1,high);
+        }
+    }
+
+    void runKdijkstra(){
+        std::cout << " START " << std::endl;
+        dijkstra(source,dest);
+        for(int i=0;i<k-1;i++){
+            int random = rand() % globalPath.size();
+            //std::cout << random << " " << random+1 << std::endl;
+            //std::cout << initialPath[i] << initialPath[i+1] << std::endl;
+            //std::cout << agencyMatrix[initialPath[random+1]][initialPath[random]] << " " << std::endl;
+            double temp = agencyMatrix[globalPath[random+1]][globalPath[random]];
+            agencyMatrix[globalPath[random+1]][globalPath[random]] = 0;
+            globalPath.clear();
+            dijkstra(source,dest);
+            agencyMatrix[globalPath[random+1]][globalPath[random]] = temp;
+        }
+
+        //quickSort(results,0,results.size());
+        for(int j=0;j<results.size();j++){
+            std::cout << "k=" << j+1 << " "<< std::fixed << results[j] << std::endl;
+        }
+    }
+
+    void dijkstra(int src,int destination){
         std::vector<double> dist(n);
-        //std::cout << dist[dest] << "dM " << std::endl;
-        //parent.clear();
+        parent.clear();
         std::vector<bool>visited(n,false);
         parent[src] = -1;
         for(int i=0;i<n;i++){
@@ -123,23 +162,34 @@ public:
             }
         }
 
-        std::cout << "distance = " << std::fixed << dist[dest] << std::endl;
-
-        return dist[dest];
-
-
-
+        //std::cout << "distance = " << std::fixed << dist[destination] << std::endl;
+        int j = dest;
+        //std::vector<int> path;
+        globalPath.push_back(destination);
+        while(j!=-1){
+            globalPath.emplace_back(parent[j]);
+            //std::cout << j << std::endl;
+            j = parent[j];
+        }
+        /*for(int i=0;i<path.size();i++){
+            std::cout << path[i] <<  " " << std::endl;
+        }*/
+        results.push_back(dist[destination]);
+        //return path;
     }
 
 public:
     int n,m; //num nodes, num edges
     int source,dest;//source dest
     int x;
-    int k = 5; // kTimes
+    int k = 10; // kTimes
     int current = 0; //current k value
-protected:
     std::vector<std::vector<double>> agencyMatrix;
+
+protected:
     std::vector<int> parent;
+    std::vector<int> globalPath;
+    std::vector<double> results;
 
 };
 
@@ -149,9 +199,9 @@ int main(int argc, char *argv[]) {
 
     ksp main;
     main.readData(argv[1]);
-    main.dijkstra(main.source);
-    main.kSolution();
-    main.dijkstra(main.source);
+    main.runKdijkstra();
+
+    //std::vector<int> initialPath = main.dijkstra(3,2);
 
 
 
