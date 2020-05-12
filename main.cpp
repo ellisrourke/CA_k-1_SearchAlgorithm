@@ -59,40 +59,6 @@ public:
         return index;
     }
 
-    /*void getPath(std::vector<int> &parent, int &j)
-    {
-        // Base Case : If j is source
-        if (parent[j] == - 1)
-            return;
-        edgeList.emplace_back(std::make_tuple(parent[j],j));
-        getPath(parent, parent[j]);
-        //std::cout << j << " ";
-    }*/
-
-    /*void kSolution() {
-
-
-        while(sol == INT_MAX){
-            a = parent[x];
-            b = parent[a];
-            x = a;
-            temp = agencyMatrix[b][a];
-            agencyMatrix[b][a]  = 0;
-            sol = dijkstra(source);
-            agencyMatrix[b][a] = temp;
-        }
-
-        std::cout << "---" << std::endl;
-        std::cout << b << " " << a << " ";
-        std::cout << agencyMatrix[b][a] << std::endl;
-        std::cout << b << " " << a << " ";
-        std::cout << agencyMatrix[b][a] << std::endl;
-        std::cout << "---" << std::endl;
-
-
-        parent.clear();
-        }
-*/
 
     static void swap(double* x, double* y)
     {
@@ -126,9 +92,6 @@ public:
         dijkstra(source,dest);
         for(int i=0;i<k-1;i++){
             int random = rand() % globalPath.size();
-            //std::cout << random << " " << random+1 << std::endl;
-            //std::cout << initialPath[i] << initialPath[i+1] << std::endl;
-            //std::cout << agencyMatrix[initialPath[random+1]][initialPath[random]] << " " << std::endl;
             double temp = agencyMatrix[globalPath[random+1]][globalPath[random]];
             agencyMatrix[globalPath[random+1]][globalPath[random]] = 0;
             globalPath.clear();
@@ -138,7 +101,7 @@ public:
 
         //quickSort(results,0,results.size());
         for(int j=0;j<results.size();j++){
-            std::cout << "k=" << j+1 << " "<< std::fixed << results[j] << std::endl;
+            std::cout << std::fixed << results[j] << std::endl;
         }
     }
 
@@ -174,7 +137,10 @@ public:
         /*for(int i=0;i<path.size();i++){
             std::cout << path[i] <<  " " << std::endl;
         }*/
-        results.push_back(dist[destination]);
+        //if(dist[dest])
+        if(dist[destination]!=INT_MAX){results.push_back(dist[destination]);}
+        else{k+=1;}
+
         //return path;
     }
 
@@ -182,7 +148,7 @@ public:
     int n,m; //num nodes, num edges
     int source,dest;//source dest
     int x;
-    int k = 10; // kTimes
+    int k = 8; // kTimes
     int current = 0; //current k value
     std::vector<std::vector<double>> agencyMatrix;
 
