@@ -3,184 +3,142 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
-#include <float.h>
+#include <cfloat>
 #include <ctime>
 
-class ksp{
+class ksp {
 public:
-    ksp(){}
-    void readData(const std::string &fileName){
+    ksp() {}
+    void readData(const std::string & fileName) {
+        std::cout << "Reading input data..." << std::endl;
         std::ifstream inFile;
-        inFile.open(fileName);
 
-        if(!inFile.is_open()){ std::cerr << "file error" << std::endl; }
+        //Open inpit file and verify it opened correctly
+        inFile.open(fileName);
+        if (!inFile.is_open()) {
+            std::cerr << "file error" << std::endl;
+        }
 
         std::string inLine;
-        inFile >> n  >> m;
-        agencyMatrix.resize(n);
-        parent.resize(n);
-        for (int i = 0; i < n; ++i){agencyMatrix[i].resize(n);}
-        //std::cout << agencyMatrix[0][1];
-        int a=0,b=0;
-        double w=0.0;
-        int count =0;
-        while(count<m){
-            std::getline(inFile,inLine);
+        inFile >> n >> m; //retrieve the number of nodes and edges from the file
+        agecencyMatrix.resize(n);//resize the matrix to accommodate the number of nodes in the input file
+        parent.resize(n);//resize the parent node array to accommodate the number of nodes in the input file
+        for (int i = 0; i < n; ++i) {
+            agecencyMatrix[i].resize(n); //resize each row in the matrix to accommodate the number of nodes in the input file
+        }
+
+        //a = edges first node, b = edges second node
+        //w = edge weight
+
+        //for each of the edges in the input file
+        //retrieve the indexes and the weight and update the adjacency matrix accordingly
+        int a = 0, b = 0;
+        double w = 0.0;
+        int count = 0;
+        while (count < m) {
+            std::getline(inFile, inLine);
             inFile >> a >> b >> w;
-            agencyMatrix[a][b] = w;
+            agecencyMatrix[a][b] = w;
             count++;
         }
-        std::getline(inFile,inLine);
-        inFile >> source >> dest;
+
+        //retrieve the source and destination nodes along with the k number of paths to find
+        std::getline(inFile, inLine);
+        inFile >> source >> dest >> k;
+        std::cout << "finding paths from " << source << " to " << dest << " for k = " << k << std::endl << std::endl;
         x = dest;
     }
-    void outputMatrix(){
-        std::cout << "  ";
-        for(int i=0;i<n;i++){std::cout << i << " ";}
-        std::cout << std::endl;
-        for (int i = 0; i < n; i++) {
-            std::cout << i << '|';
-            for (int j = 0; j < n; j++){
-                std::cout<< agencyMatrix[i][j]<< " ";
-            }
-            std::cout<< std::endl;
-        }
-    }
-    int minDist(std::vector<double> &dist, std::vector<bool> &visitedList){
-        int min = INT_MAX;
-        int index=0;
 
-        for(int i=0;i<n;i++){
-            if(visitedList[i] == false && dist[i]<=min){
+    //find the minimum value in the list of distances that has also not been
+    //marked as visited in the visitedList  --(supporting function for Dijkstra implementation)--
+    int minDist(std::vector < double > & dist, std::vector < bool > & visitedList) {
+        int min = INT_MAX;
+        int index = 0;
+
+        for (int i = 0; i < n; i++) {
+            if (visitedList[i] == false && dist[i] <= min) {
                 min = dist[i];
-                index=i;
+                index = i;
             }
         }
         return index;
     }
 
-
-    static void swap(double* x, double* y)
-    {
-        double temp = *x;
-        *x = *y;
-        *y = temp;
-    }
-    static int partition(std::vector<double> scores, int low, int high){
-        int pivot = scores[high];
-        int index = (low - 1);
-
-        for(int i=low;i<=high;i++){
-            if(scores[i] <= pivot){
-                i++;
-                swap(&scores[index],&scores[i]);
-            }
-        }
-        swap(&scores[index+1],&scores[high]);
-        return(index+1);
-    }
-    static void quickSort(std::vector<double> &scores, int low, int high){
-        if(low<high){
-            int pIndex = partition(scores,low,high);
-            quickSort(scores,low,pIndex-1);
-            quickSort(scores,pIndex+1,high);
-        }
-    }
-
-    void runKdijkstra(){
-        std::cout << " START " << std::endl;
-        dijkstra(source,dest);
-        for(int i=0;i<k-1;i++){
+    //run dijkstra for k iterations, removing a edge from the path each time to allow Dijkstra's algorithm to find a new path
+    void runKdijkstra() {
+        dijkstra(source, dest);//run initial pass of Dijkstra algorithm
+        for (int i = 0; i < k - 1; i++) {
             int random = rand() % globalPath.size();
-            double temp = agencyMatrix[globalPath[random+1]][globalPath[random]];
-            agencyMatrix[globalPath[random+1]][globalPath[random]] = 0;
+            double temp = agecencyMatrix[globalPath[random + 1]][globalPath[random]];
+            agecencyMatrix[globalPath[random + 1]][globalPath[random]] = 0;
             globalPath.clear();
-            dijkstra(source,dest);
-            agencyMatrix[globalPath[random+1]][globalPath[random]] = temp;
+            dijkstra(source, dest);
+            agecencyMatrix[globalPath[random + 1]][globalPath[random]] = temp;
         }
 
-        //quickSort(results,0,results.size());
-        for(int j=0;j<results.size();j++){
+        std::cout << "Approximate k shortest paths: " << std::endl;
+        for (int j = 0; j < results.size(); j++) {
             std::cout << std::fixed << results[j] << std::endl;
         }
     }
 
-    void dijkstra(int src,int destination){
-        std::vector<double> dist(n);
-        parent.clear();
-        std::vector<bool>visited(n,false);
+    //generic dijkstra's shortest path implementation
+    //given a source and destination node, find the sh
+    void dijkstra(int src, int destination) {
+        std::vector < double > dist(n); //store distances to each node
+        parent.clear(); //clear parents from previous dijkstra run
+        std::vector < bool > visited(n, false); //initialise visited status for each node to false
         parent[src] = -1;
-        for(int i=0;i<n;i++){
-            dist[i] = INT_MAX;
+        for (int i = 0; i < n; i++) {
+            dist[i] = INT_MAX; //initialise each distance to max int value
         }
         dist[src] = 0; //set distance of start node to 0
-        for(int i =0; i<n-1;i++){ //find next closest node
-            int nextNode = minDist(dist,visited);
+        for (int i = 0; i < n - 1; i++) {
+            int nextNode = minDist(dist, visited); //find next closest node and set as visited
             visited[nextNode] = true;
-            for(int j=0;j<n;j++){ //update distances for next nodes
-                if (!visited[j] && agencyMatrix[nextNode][j]!=0 && dist[nextNode] + agencyMatrix[nextNode][j] < dist[j]){
+            for (int j = 0; j < n; j++) { //update distances for next nodes
+                //   node has not been visited + weight of edge not blank + the distance to the node is less than the previously recorded value for the node
+                if (!visited[j] && agecencyMatrix[nextNode][j] != 0 && dist[nextNode] + agecencyMatrix[nextNode][j] < dist[j]) {
                     parent[j] = nextNode;
-                    dist[j] = dist[nextNode] + agencyMatrix[nextNode][j];
+                    dist[j] = dist[nextNode] + agecencyMatrix[nextNode][j];
                 }
             }
         }
 
-        //std::cout << "distance = " << std::fixed << dist[destination] << std::endl;
         int j = dest;
-        //std::vector<int> path;
         globalPath.push_back(destination);
-        while(j!=-1){
-            globalPath.emplace_back(parent[j]);
-            //std::cout << j << std::endl;
+        while (j != -1) {
+            globalPath.emplace_back(parent[j]); //go backwards throught the links to calculate the path
             j = parent[j];
         }
-        /*for(int i=0;i<path.size();i++){
-            std::cout << path[i] <<  " " << std::endl;
-        }*/
-        //if(dist[dest])
-        if(dist[destination]!=INT_MAX){results.push_back(dist[destination]);}
-        else{k+=1;}
 
-        //return path;
+        if (dist[destination] != INT_MAX) { //ensure a solution was found before adding to the list of solutions
+            results.push_back(dist[destination]);
+        } else {
+            k += 1; //if solution not found, increase k to allow algorithm to run again
+        }
+
     }
 
 public:
-    int n,m; //num nodes, num edges
-    int source,dest;//source dest
-    int x;
-    int k = 8; // kTimes
+    int n, m; //num nodes, num edges
+    int source, dest; //source dest
+    int x = 0;
+    int k = 0; // kTimes
     int current = 0; //current k value
-    std::vector<std::vector<double>> agencyMatrix;
+    std::vector < std::vector < double >> agecencyMatrix;
 
 protected:
-    std::vector<int> parent;
-    std::vector<int> globalPath;
-    std::vector<double> results;
+    std::vector < int > parent; //list of parents for each node
+    std::vector < int > globalPath; //list recording the path found
+    std::vector < double > results; //list of valid solutions found
 
 };
 
-
-int main(int argc, char *argv[]) {
+int main(int argc, char * argv[]) {
     srand(time(0));
-
     ksp main;
     main.readData(argv[1]);
     main.runKdijkstra();
-
-    //std::vector<int> initialPath = main.dijkstra(3,2);
-
-
-
-
-
-
-
-    //N = number of veriticies
- //M = number of edges
-
- //s = start node
- //d = destination node
- //k = number of paths to find
-
 
 }
